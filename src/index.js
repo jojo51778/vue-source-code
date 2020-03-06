@@ -5,7 +5,10 @@ let vm = new Vue({
   data(){
     return {
       msg: '123',
-      arr: [{a:1},2,3]
+      arr: [{a:1},2,3],
+      my: {
+        name: 'jojo'
+      }
     }
   },
   computed: {
