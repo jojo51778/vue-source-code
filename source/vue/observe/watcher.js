@@ -70,9 +70,9 @@ function nextTick(cb) {
   let timerFunc = () => {
     flushCallbacks()
   }
-  // if(Promise) {
-  //   return Promise.resolve().then(timerFunc)
-  // }
+  if(Promise) {
+    return Promise.resolve().then(timerFunc)
+  }
   if(MutationObserver) {
     let observer = new MutationObserver(timerFunc)
     let textNode = document.createTextNode(1)
