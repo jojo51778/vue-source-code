@@ -1,23 +1,25 @@
 import { observe } from './index'
-import { arrayMethods } from './array'
-import { observerArray } from './array'
+import { arrayMethods, observerArray } from './array'
+import Dep from './dep'
 
 export function defineReactive(data, key, value) {
 
 
   // value还是对象需要遍历深度观
   observe(value)
+  let dep = new Dep() //收集依赖，watcher
   Object.defineProperty(data, key, {
-    get() {
-      console.log('获取数据')
+    get() { //只要取值了，就会把当前watcher存入
+      if (Dep.target) { //存入的watcher不能重复，会导致多次渲染
+        dep.depend() // dep存watcher,watcher存dep
+      }
       return value
     },
     set(newValue) {
-      if(value === newValue) {
-        return
-      }
-      console.log('设置数据')
+      if(value === newValue) return
+      observe(value) //如果是对象
       value = newValue
+      dep.notify()
     }
   })
 }

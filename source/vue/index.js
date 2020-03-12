@@ -24,6 +24,7 @@ function query(el) {
 }
 
 Vue.prototype._update = function() {
+  console.log('更新')
   // 用户传入的数据去更新视图
   let vm = this
   let el = vm.$el
@@ -42,7 +43,7 @@ Vue.prototype.$mount = function() {
   let el = vm.$options.el
   el = vm.$el =  query(el) //获取挂在节点 ,vm.$el是挂载的一个元素
 
-  // 渲染用watcher
+  // 渲染用watcher, 默认执行get方法
   // vue2.0组件级别更新
   let updateComponent = () => { //更新组件，渲染逻辑
     vm._update() //更新组件
@@ -50,5 +51,12 @@ Vue.prototype.$mount = function() {
 
   new Watcher(vm, updateComponent) //渲染watcher，默认调用updateComponent
 }
+// 默认创建一个渲染watcher ，默认执行
 
+
+// pushTarget(this) //渲染watcher,Dep.target = watcher
+// this.getter() //执行传入函数。 触发 addSub(watcher)
+// popTarget()
+
+// notify 通知， 调用set方法
 export default Vue
