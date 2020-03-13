@@ -51,9 +51,9 @@ Vue.prototype.$mount = function() {
 
   new Watcher(vm, updateComponent) //渲染watcher，默认调用updateComponent
 }
-Vue.prototype.$watch = function(expr, handler) {
+Vue.prototype.$watch = function(expr, handler, opts) {
   let vm = this
-  new Watcher(vm, expr, handler, {user: true}) //用户自己定义的watch
+  new Watcher(vm, expr, handler, {user: true, ...opts}) //用户自己定义的watch
 }
 // 默认创建一个渲染watcher ，默认执行
 
