@@ -9,7 +9,7 @@ export default function initState(vm) {
     initComputed()
   }
   if(opts.watch) {
-    initWatch()
+    initWatch(vm)
   }
 }
 
@@ -18,6 +18,9 @@ export function observe(data) {
     return //不是对象或者null直接返回
   }
 
+  if(data.__ob__) { //已经被监控过了
+    return data.__ob__
+  }
   return new Observer(data)
 }
 
@@ -46,7 +49,14 @@ function initData(vm) {
 function initComputed() {
 
 }
-
-function initWatch() {
-
+function createWatcher(vm, key ,handler) {
+  // 内部最终也会使用$watcher
+  return vm.$watch(key, handler)
+}
+function initWatch(vm) {
+  let watch = vm.$options.watch
+  for(let key in watch) {
+    let handler = watch[key]
+    createWatcher(vm, key, handler)
+  }
 }

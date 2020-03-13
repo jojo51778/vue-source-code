@@ -18,6 +18,15 @@ export function observerArray(inserted) { //循环数组每一项进行监测
     observe(inserted[i]) //对数组中的对象进行观察
   }
 }
+export function dependArray(value) { // 递归搜集数组中的依赖
+  for(let i = 0; i < value.length; i++) {
+    let currentItem = value[i]
+    currentItem.__ob__ && currentItem.__ob__.dep.depend()
+    if(Array.isArray(currentItem)) {
+      dependArray(currentItem)
+    }
+  }
+}
 methods.forEach(method => {
   arrayMethods[method] = function (...args) { //函数劫持 切片编程
     let r = oldArrayProtoMethods[method].apply(this,args)
@@ -37,6 +46,7 @@ methods.forEach(method => {
       observerArray(inserted)
     }
     console.log('数组方法')
+    this.__ob__.dep.notify() //通知视图更新
     return r
   }
 })

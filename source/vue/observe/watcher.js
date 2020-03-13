@@ -1,5 +1,7 @@
 import {pushTarget, popTarget} from './dep'
+import {util} from '../util'
 let id = 0
+
 class Watcher{ //每次产生的一个watcher都有唯一的标识
   /**
    * 
@@ -8,24 +10,34 @@ class Watcher{ //每次产生的一个watcher都有唯一的标识
    * @param {*} cb 回调函数，vm.$watch('msg', cb)
    * @param {*} opts 一些其他参数
    */
+  // vm ,msg ,() =>{} ,{}
   constructor(vm, exprOrFn, cb = () => {}, opts = {}) {
     this.vm = vm
     this.exprOrFn = exprOrFn
     if(typeof exprOrFn === 'function') {
       this.getter = exprOrFn // _update 更新组件
+    } else {
+      this.getter = function() { //将vm对应的表达式提取出来
+        return util.getValue(vm, exprOrFn)
+      }
+    }
+    if(opts.user) { //标识，用户自己写的watcher
+      this.user = true
     }
     this.cb = cb
     this.deps = []
     this.depsId = new Set()
     this.opts = opts
     this.id = id++
-
-    this.get() //默认创建
+    // 创建watcher的时候，将表达式的值取出来（老值）
+    this.value = this.get() //默认创建一个watcher,调用自身的get方法
   }
   get() {
+    // Dep.target用户自己的watcher
     pushTarget(this) //渲染watcher,Dep.target = watcher
-    this.getter() //执行传入函数
+    let value = this.getter() //执行传入函数
     popTarget()
+    return value
   }
 
   addDep(dep) { //同一个watcher,不应该重复dep, 让watcher dep相互记忆
@@ -41,7 +53,10 @@ class Watcher{ //每次产生的一个watcher都有唯一的标识
     queueWatcher(this)
   }
   run() {
-    this.get()
+    let value = this.get()
+    if (this.value !== value) {
+      this.cb(value, this.value) //新值，老值传进去
+    }
   }
 }
 let has = {}

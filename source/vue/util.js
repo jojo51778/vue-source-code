@@ -12,7 +12,7 @@ export const util = {
       node.expr = node.textContent; // 给节点增加了一个自定义属性 为了方便后续的更新操作
     }
     node.textContent = node.expr.replace(defaultRE, function(...args) {
-      return util.getValue(vm, args[1])
+      return JSON.stringify(util.getValue(vm, args[1]))
     })
   }
 }
