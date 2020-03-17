@@ -19,12 +19,11 @@ let oldVnode = h('div',{id:'container'},
 );
 
 let newVnode = h('div',{id:'container'},
-  h('li',{style:{background:'red'},key:'e'},'e'),
-  h('li',{style:{background:'yellow'},key:'f'},'f'),
+  h('li',{style:{background:'pink'},key:'e'},'e'),
   h('li',{style:{background:'red'},key:'a'},'a'),
-  h('li',{style:{background:'yellow'},key:'b'},'b'),
+  h('li',{style:{background:'yellow'},key:'f'},'f'),
   h('li',{style:{background:'blue'},key:'c'},'c'),
-  h('li',{style:{background:'pink'},key:'d'},'d'),
+  h('li',{style:{background:'blue'},key:'n'},'n'),
 )
 render(oldVnode, app)
 setTimeout(() => {

@@ -94,14 +94,49 @@ function updateChildren(parent, oldChildren, newChildren) {
   let newEndIndex = newChildren.length - 1
   let newEndVnode = newChildren[newEndIndex]
 
+  function makeIndexByKey(children) {
+    let map = {}
+    children.forEach((item, index) => {
+      map[item.key] = index
+    })
+    return map
+  }
+  let map = makeIndexByKey(oldChildren)
   while(oldStartIndex <= oldEndIndex && newStartIndex <= newEndIndex) {
-    if(isSameVnode(oldStartVnode, newStartVnode)) {
+    if(!oldStartVnode) {
+      oldStartVnode = oldChildren[++oldStartIndex]
+    } else if(!oldEndVnode) {
+      oldEndVnode = oldChildren[--oldEndIndex]
+    } else if(isSameVnode(oldStartVnode, newStartVnode)) {
       patch(oldStartVnode, newStartVnode) //新属性更新老的属性
       oldStartVnode = oldChildren[++oldStartIndex]
       newStartVnode = newChildren[++newStartIndex]
     } else if(isSameVnode(oldEndVnode, newEndVnode)) { //从后面比较是否一样
+      patch(oldEndVnode, newEndVnode)
       oldEndVnode = oldChildren[--oldEndIndex]
       newEndVnode = newChildren[--newEndIndex]
+    } else if (isSameVnode(oldStartVnode, newEndVnode)) { // 倒叙
+      patch(oldStartVnode,newEndVnode)
+      parent.insertBefore(oldStartVnode.el,oldEndVnode.el.nextSibling)
+      oldStartVnode = oldChildren[++oldStartIndex]
+      newEndVnode = newChildren[--newEndIndex]
+    } else if (isSameVnode(oldEndVnode, newStartVnode)) { //反序，将尾部插到前面
+      patch(oldEndVnode, newStartVnode)
+      parent.insertBefore(oldEndVnode.el, oldStartVnode.el)
+      oldEndVnode = oldChildren[--oldEndIndex]
+      newStartVnode = newChildren[++newStartIndex]
+    } else {
+      // 拿新节点的第一项，去老节点匹配，如果匹配不到直接将这个节点插入到老节点开头的前面，如果能查到则直接移动老节点
+      let moveIndex = map[newStartVnode.key]
+      if(moveIndex == undefined) {
+        parent.insertBefore(createElm(newStartVnode), oldStartVnode.el)
+      } else {
+        let moveVnode = oldChildren[moveIndex]
+        oldChildren[moveIndex] = undefined
+        parent.insertBefore(moveVnode.el, oldStartVnode.el)
+        patch(moveVnode, newStartVnode)
+      }
+      newStartVnode = newChildren[++newStartIndex]
     }
   }
   // 新的还有剩余
@@ -109,6 +144,15 @@ function updateChildren(parent, oldChildren, newChildren) {
     for(let i = newStartIndex; i <= newEndIndex; i++ ) {
       let ele = newChildren[newEndIndex+1] == null ? null : newChildren[newEndIndex+1].el //null表示插到后面
       parent.insertBefore(createElm(newChildren[i]), ele)
+    }
+  }
+  // 老的多余
+  if(oldStartIndex <= oldEndIndex) {
+    for(let i =oldStartIndex; i <= oldEndIndex; i++) {
+      let child = oldChildren[i]
+      if(child != undefined) {
+        parent.removeChild(child.el)
+      }
     }
   }
 }
