@@ -1,6 +1,7 @@
 export function render(vnode, container) {
   let el = createElm(vnode)
   container.appendChild(el)
+  return el
 }
 
 function createElm(vnode) {
@@ -77,6 +78,7 @@ export function patch(oldVnode, newVnode) {
       el.appendChild(createElm(child)) //将当前新的儿子丢到老的节点即可
     }
   }
+  return el
 }
 function isSameVnode(oldVnode, newVnode) {
   return (oldVnode.tag === newVnode.tag) && (oldVnode.key === newVnode.key)

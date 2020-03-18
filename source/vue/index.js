@@ -1,6 +1,7 @@
 import initState from './observe'
 import Watcher from './observe/watcher'
 import {compiler, util} from './util'
+import {render, patch, h} from './vdom'
 
 function Vue(options) {
   this._init(options)
@@ -23,20 +24,35 @@ function query(el) {
   return el
 }
 
-Vue.prototype._update = function() {
+Vue.prototype._update = function(vnode) {
   console.log('更新')
   // 用户传入的数据去更新视图
   let vm = this
   let el = vm.$el
-  // 循环这个四元数，将里面内容转为数据
-  let node = document.createDocumentFragment() //文档碎片
-  let firstChild
-  while(firstChild = el.firstChild) {
-    node.appendChild(firstChild)
-  }
 
-  compiler(node, vm)
-  el.appendChild(node)
+  let preVnode = vm.preVnode
+  if(!preVnode) { //初次渲染
+    vm.preVnode = vnode
+    vm.$el = render(vnode, el)
+  } else {
+    vm.$el = patch(preVnode, vnode)
+  }
+  // 循环这个四元数，将里面内容转为数据
+  // let node = document.createDocumentFragment() //文档碎片
+  // let firstChild
+  // while(firstChild = el.firstChild) {
+  //   node.appendChild(firstChild)
+  // }
+
+  // compiler(node, vm)
+  // el.appendChild(node)
+}
+Vue.prototype._render = function() {
+  let vm = this
+  let render = vm.$options.render
+
+  let vnode = render.call(vm, h)
+  return vnode
 }
 Vue.prototype.$mount = function() {
   let vm = this
@@ -46,7 +62,7 @@ Vue.prototype.$mount = function() {
   // 渲染用watcher, 默认执行get方法
   // vue2.0组件级别更新
   let updateComponent = () => { //更新组件，渲染逻辑
-    vm._update() //更新组件
+    vm._update(vm._render()) //更新组件
   }
 
   new Watcher(vm, updateComponent) //渲染watcher，默认调用updateComponent

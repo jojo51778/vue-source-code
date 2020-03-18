@@ -53,7 +53,7 @@ class Observer {
     for(let i = 0; i < keys.length; i++) {
       let key = keys[i]
       let value = data[key]
-      defineReactive(data, key, value,)
+      defineReactive(data, key, value)
     }
   }
 }
